@@ -1,15 +1,65 @@
-svg {
-  font: 10px sans-serif;
+.iOCSS.black {
+	color: rgb(220, 220, 220);
 }
- 
-.line {
-  fill: none;
-  stroke: #000;
-  stroke-width: 1.5px;
+
+/* Frame */
+.iOCSS.black .frame {
+	background-color: rgb(20, 20, 20);
 }
- 
-.axis path, .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+
+/* List */
+.iOCSS.black .list li {
+	background-color: rgb(41, 41, 41);
+	border-bottom-color: rgb(73, 73, 73);
+}
+
+
+/* Well */
+.iOCSS.black .well {
+	position: relative;
+
+	padding: 0;
+	
+	background-color: rgb(0, 0, 0);
+
+	border-color: rgb(40, 40, 40);
+	box-shadow: 0 0.0625rem 0 rgb(77, 77, 77);
+}
+
+.iOCSS.black .well canvas {
+	position: relative;
+	z-index: 1;
+
+	margin-top: -2.375rem;
+
+	display: block;
+	overflow: hidden;
+
+	border-radius: 0 0 0.625rem 0.625rem;
+}
+
+.iOCSS.black .well h2 {
+	position: relative;
+	z-index: 2;
+	
+	padding: 0.5rem 0.5rem;
+
+	border-radius: 0.625rem 0.625rem 0 0;
+
+	color: rgba(255, 255, 255, 0.75);
+	text-align: center;
+	font-weight: bold;
+	/*text-shadow: 0 -0.0625rem 0.0625rem rgba(0, 0, 0, 0.4);*/
+}
+
+/* Stats */
+.well .percent {
+	position: absolute;
+	top: 0.75rem;
+	right: 0.75rem;
+	z-index: 3;
+	
+	font-weight: bold;
+	font-size: 0.85rem;
+	opacity: 0.65;
 }

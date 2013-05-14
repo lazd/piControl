@@ -20,14 +20,19 @@ pc.Stats = F.Component.extend({
 	},
 	setup: function() {
 		this.addComponent(new pc.Graph({
-			el: this.view.$('.cpuGraph')
+			el: this.view.$('.cpuGraph'),
+			maxValue: 100,
+			minValue: 0
 		}), 'cpuGraph');
 
 		this.addComponent(new pc.Graph({
 			el: this.view.$('.memoryGraph'),
-			maxValue: undefined,
+			maxValue: 100,
 			minValue: 0
 		}), 'memoryGraph');
+
+		this.$cpuPercent = this.view.$('.cpuPercent');
+		this.$memoryPercent = this.view.$('.memoryPercent');
 
 		this.interval = setInterval(this.getData, this.options.interval);
 		this.getData();
@@ -39,17 +44,20 @@ pc.Stats = F.Component.extend({
 		var self = this;
 		$.ajax('/api/stats/load', {
 			success: function(response) {
-				self.cpuGraph.addPoint(response.body.time, response.body.usage*100);
+				var percent = response.body.percent*100;
+
+				self.$cpuPercent.text(percent.toFixed(1)+'%');
+
+				self.cpuGraph.addPoint(response.time, percent);
 			}
 		});
 		$.ajax('/api/stats/memory', {
 			success: function(response) {
-				if (!self.totalMemory) {
-					self.totalMemory = response.body.total;
-					self.memoryGraph.series.maxValue = self.totalMemory;
-				}
+				var percent = response.body.percent*100;
 
-				self.memoryGraph.addPoint(response.body.time, response.body.total-response.body.free);
+				self.$memoryPercent.text(percent.toFixed(1)+'%');
+
+				self.memoryGraph.addPoint(response.time, percent);
 			}
 		});
 	}

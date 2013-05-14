@@ -100,8 +100,8 @@ module.exports = function(grunt) {
 				tasks: [ 'jshint', 'copy', 'concat' ]
 			},
 			html: {
-				files: [ 'source/public/*.html' ],
-				tasks: [ 'copy' ]
+				files: [ 'source/public/*.html', 'source/public/pc/Styles/*.css' ],
+				tasks: [ 'copy', 'concat' ]
 			},
 			hbs: {
 				files: [ 'source/templates/*.hbs' ],

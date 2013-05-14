@@ -9,38 +9,38 @@ function getCPUInfo(callback) {
 	var idle = 0;
 	var irq = 0;
 
-	for(var cpu in cpus){
-		user += cpus[cpu].times.user;
-		nice += cpus[cpu].times.nice;
-		sys += cpus[cpu].times.sys;
-		irq += cpus[cpu].times.irq;
-		idle += cpus[cpu].times.idle;
-	}
+	cpus.forEach(function(cpu) {
+		user += cpu.times.user;
+		nice += cpu.times.nice;
+		sys += cpu.times.sys;
+		irq += cpu.times.irq;
+		idle += cpu.times.idle;
+	});
 
-	var total = user + nice + sys + idle + irq;
+	var total = user + nice + sys + irq;
 
 	return {
+		'cpus': cpus.length,
 		'idle': idle, 
-		'total': total
+		'working': total
 	};
 }
 
 function getCPUUsage(callback) {
-	var stats1 = getCPUInfo();
-	var startIdle = stats1.idle;
-	var startTotal = stats1.total;
+	var sampleTime = 1000;
+
+	var cpuInfo_before = getCPUInfo();
 
 	setTimeout(function() {
-		var stats2 = getCPUInfo();
-		var endIdle = stats2.idle;
-		var endTotal = stats2.total;
+		var cpuInfo_now = getCPUInfo();
+		var total = cpuInfo_now.working/10 - cpuInfo_before.working/10;
+		var pct = total / cpuInfo_now.cpus / sampleTime;
 
-		var idle = endIdle - startIdle;
-		var total = endTotal - startTotal;
-		var perc = idle / total;
+		console.log(total);
+		console.log('CPU: %sms, %s', total.toFixed(2), pct.toFixed(2));
 
-		callback(perc);
-	}, 1000 );
+		callback(pct);
+	}, sampleTime);
 }
 
 var Statistics = {
@@ -68,9 +68,9 @@ var Statistics = {
 				getCPUUsage(function(percent) {
 					res.json({
 						status: 0,
+						time: new Date().getTime(),
 						body: {
-							time: new Date().getTime(),
-							usage: percent
+							percent: percent
 						}
 					});
 				});
@@ -84,6 +84,7 @@ var Statistics = {
 				memory.time = new Date().getTime();
 				res.json({
 					status: 0,
+					time: new Date().getTime(),
 					body: memory
 				});
 			}
@@ -94,9 +95,14 @@ var Statistics = {
 		return os.loadavg();
 	},
 	getMemory: function() {
+		var totalMem = os.totalmem();
+		var freeMem = os.freemem();
+		var used = totalMem-freeMem;
+		var percent = used/totalMem;
 		return {
-			free: os.freemem(),
-			total: os.totalmem()
+			used: used,
+			total: totalMem,
+			percent: percent
 		};
 	},
 
