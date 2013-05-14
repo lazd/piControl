@@ -1,0 +1,33 @@
+{
+  "name": "piControl",
+  "version": "0.0.1",
+  "description": "A client-server system for controlling the Raspberry Pi",
+  "author": "Larry Davis <lazdnet@gmail.com>",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/lazd/piControl.git"
+  },
+  "keywords": [
+    "raspberry",
+    "pi",
+    "rest",
+    "mobile"
+  ],
+  "main": "server/index.js",
+  "devDependencies": {
+    "grunt-cli": "~0.1.7",
+    "grunt": "~0.4.1",
+    "grunt-contrib-clean": "~0.4.1",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-watch": "~0.3.1",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-contrib-handlebars": "~0.5.8",
+    "grunt-contrib-concat": "~0.3.0"
+  },
+  "dependencides": {
+    "iocss": "https://github.com/lazd/iOCSS.git"
+  }
+}
