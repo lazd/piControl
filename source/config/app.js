@@ -22,6 +22,7 @@ module.exports = function(app) {
 		app.set('templates', compiled);
 		*/
 	});
+
 	// Configure expressjs
 	app.configure(function() {
 		this
@@ -35,4 +36,7 @@ module.exports = function(app) {
 			.use(express.errorHandler({ dumpException: true, showStack: true }))
 			.use(express.static(app.set('root')+'public/'));
 	});
+
+	// Add default vars
+	app.set('heartbeats', []);
 };

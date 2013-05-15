@@ -11,7 +11,7 @@ pc.Graph = F.Component.extend({
 		minValue: 0,
 		maxValue: 100,
 		maxValueScale: 1,
-		delay: 1500,
+		delay: 1000,
 		height: 200
 	},
 

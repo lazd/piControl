@@ -1,6 +1,6 @@
 var fs = require('fs');
 
-module.exports = function(app) {
+module.exports = function(app, io) {
 	var modules = [];
 
 	// Get list of all default modules
@@ -11,8 +11,17 @@ module.exports = function(app) {
 	// Get list of all user modules
 	// TODO: Define folder, get stuff from it
 
-	// Define routes for each module
+	var heartbeats = app.set('heartbeats');
+
+	// Add interfaces for each module
 	modules.forEach(function(module, index) {
+		// Add heartbeats
+		if (module.heartbeat) {
+			console.log('Adding heartbeat for: %s', module.name);
+			heartbeats.push(module.heartbeat);
+		}
+
+		// Add routes
 		if (module.routes) {
 			console.log('Adding module: %s', module.name);
 			module.routes.forEach(function(route) {

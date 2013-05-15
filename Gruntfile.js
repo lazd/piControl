@@ -26,6 +26,8 @@ module.exports = function(grunt) {
 		'temp/pc.Partials.js',
 		'temp/pc.Templates.js',
 
+		'source/public/pc/pc.util.js',
+
 		'source/public/pc/Models/*.js',
 		'source/public/pc/Collections/*.js',
 

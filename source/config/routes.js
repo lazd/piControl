@@ -1,5 +1,5 @@
 module.exports = function(app) {
-	app.get('/api/actions', function(req, res){
+	app.get('/api/actions', function(req, res) {
 		res.setHeader('Content-Type', 'application/json');
 		res.json({
 			status: 0,

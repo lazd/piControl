@@ -18,6 +18,7 @@ pc.Stats = F.Component.extend({
 
 		this.bind('getData');
 	},
+
 	setup: function() {
 		this.addComponent(new pc.Graph({
 			el: this.view.$('.cpuGraph'),
@@ -33,33 +34,18 @@ pc.Stats = F.Component.extend({
 
 		this.$cpuPercent = this.view.$('.cpuPercent');
 		this.$memoryPercent = this.view.$('.memoryPercent');
-
-		this.interval = setInterval(this.getData, this.options.interval);
-		this.getData();
 	},
-	teardown: function() {
-		clearInterval(this.interval);
-	},
-	getData: function() {
-		var self = this;
-		$.ajax('/api/stats/load', {
-			success: function(response) {
-				var percent = response.body.percent*100;
 
-				self.$cpuPercent.text(percent.toFixed(1)+'%');
+	heartbeat: function(beat) {
+		if (!this.isVisible()) return;
 
-				self.cpuGraph.addPoint(response.time, percent);
-			}
-		});
-		$.ajax('/api/stats/memory', {
-			success: function(response) {
-				var percent = response.body.percent*100;
+		var cpuPercent = beat.cpu.usagePercent*100;
+		var memoryPercent = beat.memory.usagePercent*100;
 
-				self.$memoryPercent.text(percent.toFixed(1)+'%');
+		this.$cpuPercent.text(cpuPercent.toFixed(1)+'%');
+		this.$memoryPercent.text(pc.util.getFileSizeString(beat.memory.used)+' ('+memoryPercent.toFixed(1)+'%)');
 
-				self.memoryGraph.addPoint(response.time, percent);
-			}
-		});
+		this.cpuGraph.addPoint(beat.time, cpuPercent);
+		this.memoryGraph.addPoint(beat.time, memoryPercent);
 	}
-	
 });

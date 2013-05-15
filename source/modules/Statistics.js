@@ -3,26 +3,19 @@ var os = require("os");
 function getCPUInfo(callback) {
 	var cpus = os.cpus();
 
-	var user = 0;
-	var nice = 0;
-	var sys = 0;
+	var cpuTime = 0;
 	var idle = 0;
-	var irq = 0;
 
 	cpus.forEach(function(cpu) {
-		user += cpu.times.user;
-		nice += cpu.times.nice;
-		sys += cpu.times.sys;
-		irq += cpu.times.irq;
+		cpuTime += cpu.times.user + cpu.times.nice + cpu.times.sys + cpu.times.irq;
 		idle += cpu.times.idle;
 	});
 
-	var total = user + nice + sys + irq;
-
 	return {
-		'cpus': cpus.length,
-		'idle': idle, 
-		'working': total
+		time: new Date().getTime(),
+		cpus: cpus.length,
+		idle: idle,
+		cpuTime: cpuTime
 	};
 }
 
@@ -33,13 +26,11 @@ function getCPUUsage(callback) {
 
 	setTimeout(function() {
 		var cpuInfo_now = getCPUInfo();
-		var total = cpuInfo_now.working/10 - cpuInfo_before.working/10;
-		var pct = total / cpuInfo_now.cpus / sampleTime;
+		var total = cpuInfo_now.cpuTime/10 - cpuInfo_before.cpuTime/10;
+		var elapsed = (cpuInfo_now.time - cpuInfo_before.time);
+		var usagePercent = total / cpuInfo_now.cpus / elapsed;
 
-		console.log(total);
-		console.log('CPU: %sms, %s', total.toFixed(2), pct.toFixed(2));
-
-		callback(pct);
+		callback(usagePercent);
 	}, sampleTime);
 }
 
@@ -65,14 +56,10 @@ var Statistics = {
 			url: '/api/stats/load',
 			method: 'get',
 			handler: function(req, res, next) {
-				getCPUUsage(function(percent) {
-					res.json({
-						status: 0,
-						time: new Date().getTime(),
-						body: {
-							percent: percent
-						}
-					});
+				res.json({
+					status: 0,
+					time: new Date().getTime(),
+					body: cpuInfo
 				});
 			}
 		},
@@ -80,20 +67,24 @@ var Statistics = {
 			url: '/api/stats/memory',
 			method: 'get',
 			handler: function(req, res, next) {
-				var memory = Statistics.getMemory();
-				memory.time = new Date().getTime();
 				res.json({
 					status: 0,
 					time: new Date().getTime(),
-					body: memory
+					body: memoryInfo
 				});
 			}
 		}
 	],
 
+	heartbeat: function(beat) {
+		beat.cpu = cpuInfo;
+		beat.memory = memoryInfo;
+	},
+
 	getLoad: function() {
 		return os.loadavg();
 	},
+
 	getMemory: function() {
 		var totalMem = os.totalmem();
 		var freeMem = os.freemem();
@@ -102,7 +93,7 @@ var Statistics = {
 		return {
 			used: used,
 			total: totalMem,
-			percent: percent
+			usagePercent: percent
 		};
 	},
 
@@ -128,8 +119,27 @@ var Statistics = {
 	}
 };
 
-var app;
-module.exports = function(_app) {
-	app = _app;
+// Store memory and CPU usage info
+var memoryInfo;
+var cpuInfo = {
+	usagePercent: 0
+};
+
+module.exports = function(_app, _io) {
+	// Get the cpu and memory usage
+	var update = function() {
+		memoryInfo = Statistics.getMemory();
+
+		getCPUUsage(function(usagePercent) {
+			cpuInfo = {
+				usagePercent: usagePercent
+			};
+		});
+	};
+
+	// Get the CPU usage every second
+	update();
+	setInterval(update, 1000);
+
 	return Statistics;
 };

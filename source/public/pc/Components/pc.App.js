@@ -3,7 +3,6 @@ pc.App = F.Component.extend({
 	
 	View: F.View.extend({
 		events: {
-			'click #footer button': 'handleNav'
 		}
 	}),
 
@@ -19,23 +18,27 @@ pc.App = F.Component.extend({
 			el: this.options.el,
 			template: this.Template
 		});
+
+		this.bind('heartbeat');
 	},
 
 	setup: function() {
+		var self = this;
+
 		this.addComponent(new pc.Actions({
 			el: this.view.$('#actions')
 		}));
 
+		this.addComponent(new pc.Stats({
+			el: this.view.$('#stats')
+		}));
+		
 		/*
 		this.addComponent(new pc.Terminal({
 			el: this.view.$('.terminal')
 		}));
 		*/
 
-		this.addComponent(new pc.Stats({
-			el: this.view.$('#stats')
-		}));
-		
 		/*
 		this.addComponent(new pc.Settings({
 			el: this.view.$('.settings')
@@ -44,17 +47,26 @@ pc.App = F.Component.extend({
 
 		this.listenTo(this.actions, 'component:shown', this.setNavState);
 		this.listenTo(this.stats, 'component:shown', this.setNavState);
+
+		var socket = io.connect('/');
+		socket.on('connect', function() {
+			socket.send('hai');
+
+			socket.on('heartbeat', self.heartbeat);
+		});
 	},
 
 	setNavState: function(evt) {
-		this.view.$('#footer button[data-section="'+evt.name+'"]').siblings().removeClass('down').end().addClass('down');
+		this.view.$('#footer [data-section="'+evt.name+'"]').siblings().removeClass('down').end().addClass('down');
 	},
 
-	handleNav: function(evt) {
-		var section = $(evt.currentTarget).data('section');
+	heartbeat: function(beat) {
+		for (var name in this.components) {
+			var component = this.components[name];
 
-		if (this.components[section]) {
-			this.components[section].show();
+			if (component.heartbeat) {
+				component.heartbeat(beat);
+			}
 		}
 	}
 });
