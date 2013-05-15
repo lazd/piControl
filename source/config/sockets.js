@@ -1,17 +1,29 @@
 var color = require('shellcolor');
 
+function log(socket, message) {
+	var args = Array.prototype.slice.call(arguments, 2);
+	args.unshift(color(socket.ip+' <grey>SOCKET</grey> <cyan>'+message+'</cyan>'));
+	console.log.apply(console, args);
+}
+
+function handleAction(action, socket) {
+	log(socket, 'Perform action:', action);
+}
+
 module.exports = function(app, io) {
 	var sockets = [];
 
 	io.on('connection', function(socket) {
-		var ip = socket.handshake.address.address;
+		// Store IP
+		socket.ip = socket.handshake.address.address;
+		log(socket, 'Client connected');
 
-		console.log(color(ip+' <grey>SOCKET</grey> <cyan>Client connected</cyan>'));
-
-		socket.on('doAction', function (data) {
-			console.log(data);
+		// Listen for actions
+		socket.on('doAction', function(action) {
+			handleAction(action, socket);
 		});
 
+		// Store a reference to this socket
 		sockets.push(socket);
 	});
 

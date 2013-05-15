@@ -1,5 +1,5 @@
 {
-	"name": "Statitics",
+	"name": "Statistics",
 	"label": "Stats",
 	"icon": "icon-bar-chart",
 	"clientModule": "pc.Stats"

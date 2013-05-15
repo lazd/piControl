@@ -25,19 +25,20 @@ pc.App = F.Component.extend({
 	setup: function() {
 		var self = this;
 
-		this.addComponent(new pc.Actions({
-			el: this.view.$('#actions')
-		}));
-
-		this.listenTo(this.actions, 'component:shown', this.setNavState);
-
 		// Connect to the socket
-		var socket = io.connect('/');
+		var socket = this.socket = io.connect('/');
 		socket.on('connect', function() {
-			socket.send('hai');
-
 			socket.on('heartbeat', self.heartbeat);
 		});
+
+		// Add actions component
+		this.addComponent(new pc.Actions({
+			el: this.view.$('#actions'),
+			socket: this.socket
+		}));
+
+		// Select the footer button when shown
+		this.listenTo(this.actions, 'component:shown', this.setNavState);
 
 		// Fetch modules
 		$.ajax('/api/modules', {
@@ -56,17 +57,21 @@ pc.App = F.Component.extend({
 		var shortName = moduleInfo.label.toLowerCase();
 
 		if (moduleFunc) {
+			// Create a container for the component
 			var container = $('<div/>').appendTo(this.view.$('#content'));
 
+			// Create the instance and add the component
 			var component = this.addComponent(new moduleFunc({
-				el: container
+				el: container,
+				socket: this.socket
 			}), shortName);
-
-			this.listenTo(component, 'component:shown', this.setNavState);
 
 			if (moduleInfo.icon) {
 				// Add footer button
 				this.view.$('#footer').append('<a class="button" data-section="'+shortName+'" href="#'+shortName+'"><i class="'+moduleInfo.icon+'"></i>'+moduleInfo.label+'</a>');
+
+				// Select the footer button when shown
+				this.listenTo(component, 'component:shown', this.setNavState);
 			}
 		}
 	},

@@ -11,6 +11,7 @@ app.set('port', process.env.PORT ? parseInt(process.env.PORT, 10) : 3000);
 // Configuration
 require('./config/app')(app);
 require('./config/routes')(app);
+require('./config/actions')(app);
 
 // Start HTTP server
 var port = app.set('port');
@@ -19,7 +20,7 @@ console.log('piControl listening on on port %d', port);
 
 // Start socket server
 var io = socket.listen(server, { log: false });
-require('./config/socketEvents')(app, io);
+require('./config/sockets')(app, io);
 
 // Include modules
 require('./config/modules')(app, io);

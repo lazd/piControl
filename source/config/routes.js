@@ -10,7 +10,7 @@ module.exports = function(app) {
 
 	app.get('/pc/pc.modules.js', function(req, res) {
 		res.setHeader('Content-Type', 'text/javascript');
-		
+
 		res.end(app.set('moduleJS'));
 	});
 
@@ -18,13 +18,7 @@ module.exports = function(app) {
 		res.setHeader('Content-Type', 'application/json');
 		res.json({
 			status: 0,
-			body: [
-				{
-					name: 'Restart',
-					method: 'post',
-					url: '/api/actions/restart'
-				}
-			]
+			body: app.set('actions')
 		});
 	});
 };
