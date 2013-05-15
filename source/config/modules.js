@@ -1,20 +1,59 @@
 var fs = require('fs');
+var Handlebars = require('handlebars');
 
 module.exports = function(app, io) {
-	var modules = [];
+	var modulesPath = app.set('root')+'modules/';
+	var moduleInfo = [];
+	var serverModules = [];
+	var moduleJS = '';
 
 	// Get list of all default modules
-	fs.readdirSync(app.set('root')+'modules').forEach(function(file) {
-		modules.push(require(app.set('root')+'modules/' + file)(app));
+	fs.readdirSync(modulesPath).forEach(function(module) {
+		var modulePath = modulesPath+module+'/';
+		var serverModulePath = modulePath+'server/index.js';
+		var clientModulePath = modulePath+'client/index.js';
+		var templatesPath = modulePath+'templates/';
+		var moduleJSONPath = modulePath+'module.json';
+
+		// Get module information
+		var moduleJSON = JSON.parse(fs.readFileSync(moduleJSONPath, { encoding: 'utf8' }));
+		moduleInfo.push(moduleJSON);
+
+		// Include server-side module
+		if (fs.existsSync(serverModulePath)) {
+			// Pass the app and the soket.io instance
+			serverModules.push(require(serverModulePath)(app, io));
+		}
+
+		// Include client-side module
+		if (fs.existsSync(clientModulePath)) {
+			// Add JS
+			var curModuleJS = fs.readFileSync(clientModulePath);
+
+			// Add templates
+			fs.readdirSync(templatesPath).forEach(function(templateFileName) {
+				var templateName = templateFileName.replace(/.hbs$/, '');
+				var contents = fs.readFileSync(templatesPath+templateFileName, { encoding: 'utf8' });
+				var templateJS = 'pc.Templates['+JSON.stringify(templateName)+'] = Handlebars.template('+Handlebars.precompile(Handlebars.parse(contents))+');';
+			
+				console.log(templateJS);
+
+				moduleJS += templateJS;
+			});
+
+			moduleJS += curModuleJS;
+		}
 	});
 
-	// Get list of all user modules
-	// TODO: Define folder, get stuff from it
-
-	var heartbeats = app.set('heartbeats');
+	// Store client module information
+	app.set('moduleJS', moduleJS);
+	app.set('moduleInfo', moduleInfo);
 
 	// Add interfaces for each module
-	modules.forEach(function(module, index) {
+	var heartbeats = app.set('heartbeats');
+	serverModules.forEach(function(module, index) {
+		console.log('Adding module: %s', module.name);
+
 		// Add heartbeats
 		if (module.heartbeat) {
 			console.log('Adding heartbeat for: %s', module.name);
@@ -23,16 +62,17 @@ module.exports = function(app, io) {
 
 		// Add routes
 		if (module.routes) {
-			console.log('Adding module: %s', module.name);
 			module.routes.forEach(function(route) {
 				console.log('Adding route: %s %s', route.method, route.url);
 
 				// Get the hanlder
 				var handler;
-				if (typeof route.handler === 'function')
+				if (typeof route.handler === 'function') {
 					handler = route.handler;
-				else if (typeof route.handler === 'string')
+				}
+				else if (typeof route.handler === 'string') {
 					handler = module[route.handler];
+				}
 				else {
 					throw new Error('Module %s specified invalid handler for route %s %s', module.name, route.method, route.url);
 				}

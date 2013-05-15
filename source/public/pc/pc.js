@@ -9,6 +9,9 @@ var pc = {
 			visible: true
 		});
 
-		Backbone.history.start();
+		// Normally, we'd start history here.
+		// In this case, we're fetching a list of components to add
+		// so don't start the router until modules are added
+		// Backbone.history.start();
 	}
 };

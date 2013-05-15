@@ -1,0 +1,6 @@
+{
+	"name": "Statitics",
+	"label": "Stats",
+	"icon": "icon-bar-chart",
+	"clientModule": "pc.Stats"
+}
